@@ -1,0 +1,41 @@
+{
+  "name": "@nuan/utils",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "A utility library with tree-shaking support",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && rollup -c",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "utils",
+    "utilities",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simple-hui/nuan-utils.git"
+  },
+  "author": "Leo",
+  "license": "MIT",
+  "sideEffects": false,
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/node": "^20.10.0",
+    "rollup": "^4.6.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}
+

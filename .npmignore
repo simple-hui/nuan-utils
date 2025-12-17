@@ -1,0 +1,30 @@
+# Source files
+src/
+demo/
+*.ts
+!*.d.ts
+
+# Config files
+tsconfig.json
+rollup.config.js
+.gitignore
+.npmignore
+
+# Development files
+*.md
+!README.md
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+
