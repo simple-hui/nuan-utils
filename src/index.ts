@@ -22,3 +22,11 @@ export {
   addZero
 } from './amount';
 
+// 导出图片处理相关函数
+export {
+  urlToBase64,
+  dataURLtoBlob,
+  convertImageToGray,
+  base64Convert
+} from './image';
+
