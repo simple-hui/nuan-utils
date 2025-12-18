@@ -30,3 +30,19 @@ export {
   base64Convert
 } from './image';
 
+// 导出文件下载相关函数
+export {
+  download,
+  downloadByOnlineUrl,
+  downloadByBase64,
+  downloadByData,
+  downloadByUrl
+} from './download';
+
+// 导出相等性判断相关函数
+export {
+  isEqual,
+  isEqualObject,
+  isEqualArray
+} from './isEqual';
+
