@@ -12,3 +12,13 @@ export {
   type DeviceDetectionResult
 } from './deviceDetection';
 
+// 导出金额相关函数
+export {
+  centsToDollars,
+  dollarsToCents,
+  priceUppercase,
+  priceToThousands,
+  getDecimalPlaces,
+  addZero
+} from './amount';
+
