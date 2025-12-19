@@ -1,56 +1,90 @@
 /**
  * 金额相关工具函数
+ * 支持任意 JavaScript 环境或框架
  */
 
 /**
- * 分转元（将分为单位的数值转换为元为单位）
- * 
- * @param cents - 分单位的数值
- * @param decimals - 保留的小数位数，默认为2
- * @returns 元单位的数值
- * 
- * @example
- * ```typescript
- * centsToDollars(1000); // 10
- * centsToDollars(1234, 2); // 12.34
- * ```
+ * AmountOpt 接口
  */
-export function centsToDollars(cents: number, decimals: number = 2): number {
-  const dollars = cents / 100;
-  return decimals > 0 ? parseFloat(dollars.toFixed(decimals)) : Math.round(dollars);
+export interface AmountOpt {
+  /** 保留几位小数，默认 `0` */
+  digit?: number;
+  /** 小数位是否四舍五入，默认 `false` 不进行四舍五入 */
+  round?: boolean;
 }
 
 /**
- * 元转分（将元为单位的数值转换为分为单位）
+ * 分转元
  * 
- * @param dollars - 元单位的数值
- * @returns 分单位的数值
+ * @param val - 分
+ * @param format - 转元后像 10、20、100、1000 这种整金额默认会在末尾加 .00，如果不想要设置成 false 即可
+ * @returns 返回元单位的数值
  * 
  * @example
  * ```typescript
- * dollarsToCents(10); // 1000
- * dollarsToCents(12.34); // 1234
+ * centsToDollars(100); // 1.00
+ * centsToDollars(100, false); // 1
+ * centsToDollars(1234); // 12.34
  * ```
  */
-export function dollarsToCents(dollars: number): number {
-  return Math.round(dollars * 100);
+export function centsToDollars(val: number, format: boolean = true): number {
+  const dollars = val / 100;
+  
+  // 如果是整数且 format 为 true，返回带两位小数的数字
+  if (format && Math.floor(dollars) === dollars) {
+    return parseFloat(dollars.toFixed(2));
+  }
+  
+  // 如果不是整数，保留两位小数
+  if (!format && Math.floor(dollars) === dollars) {
+    return Math.round(dollars);
+  }
+  
+  return parseFloat(dollars.toFixed(2));
+}
+
+/**
+ * 元转分
+ * 
+ * @param val - 元
+ * @param digit - 转换倍数，默认 100
+ * @returns 返回分单位的数值
+ * 
+ * @example
+ * ```typescript
+ * dollarsToCents(1); // 100
+ * dollarsToCents(12.34); // 1234
+ * dollarsToCents(1, 1000); // 1000
+ * ```
+ */
+export function dollarsToCents(val: number, digit: number = 100): number {
+  return Math.round(val * digit);
 }
 
 /**
  * 获取数值的小数位数
  * 
- * @param num - 数值
- * @returns 小数位数
+ * @param val - 金额（可以是 number 或 string）
+ * @returns 返回小数位数
  * 
  * @example
  * ```typescript
- * getDecimalPlaces(123.45); // 2
+ * getDecimalPlaces(100.2394); // 4
+ * getDecimalPlaces('123.45'); // 2
  * getDecimalPlaces(123); // 0
- * getDecimalPlaces(123.4567); // 4
  * ```
  */
-export function getDecimalPlaces(num: number): number {
-  if (Math.floor(num) === num) return 0;
+export function getDecimalPlaces(val: number | string): number {
+  const num = typeof val === 'string' ? parseFloat(val) : val;
+  
+  if (isNaN(num)) {
+    return 0;
+  }
+  
+  if (Math.floor(num) === num) {
+    return 0;
+  }
+  
   const str = num.toString();
   if (str.indexOf('.') !== -1 && str.indexOf('e-') === -1) {
     return str.split('.')[1].length;
@@ -58,23 +92,30 @@ export function getDecimalPlaces(num: number): number {
     const parts = str.split('e-');
     return parseInt(parts[1], 10) + (parts[0].split('.')[1]?.length || 0);
   }
+  
   return 0;
 }
 
 /**
- * 在数值后面加.00（如果已经是整数，则添加两位小数）
+ * 在数值后加 `.00`
  * 
- * @param num - 数值
- * @returns 格式化后的字符串
+ * @param val - 数值（可以是 number 或 string）
+ * @returns 返回加完 `.00` 后的值
  * 
  * @example
  * ```typescript
  * addZero(123); // "123.00"
- * addZero(123.5); // "123.50"
+ * addZero('123.5'); // "123.50"
  * addZero(123.45); // "123.45"
  * ```
  */
-export function addZero(num: number): string {
+export function addZero(val: number | string): string {
+  const num = typeof val === 'string' ? parseFloat(val) : val;
+  
+  if (isNaN(num)) {
+    return String(val);
+  }
+  
   const decimalPlaces = getDecimalPlaces(num);
   if (decimalPlaces === 0) {
     return num.toFixed(2);
@@ -85,40 +126,60 @@ export function addZero(num: number): string {
 }
 
 /**
- * 格式化金额，三位加一个逗号（千分位格式化）
+ * 格式化金额，三位加一个逗号
  * 
- * @param num - 数值
- * @param decimals - 保留的小数位数，默认为2
- * @returns 格式化后的字符串
+ * @param amount - 金额
+ * @param options - 配置选项
+ * @param options.digit - 保留几位小数，默认 `0`
+ * @param options.round - 小数位是否四舍五入，默认 `false` 不进行四舍五入
+ * @returns 返回格式化后的金额
  * 
  * @example
  * ```typescript
- * priceToThousands(1234567.89); // "1,234,567.89"
- * priceToThousands(1234, 0); // "1,234"
- * priceToThousands(123.4, 2); // "123.40"
+ * priceToThousands(123456789); // "123,456,789"
+ * priceToThousands(123456789, { digit: 2 }); // "123,456,789.00"
+ * priceToThousands(123456789.567, { digit: 2 }); // "123,456,789.56"
+ * priceToThousands(123456789.567, { digit: 2, round: true }); // "123,456,789.57"
+ * priceToThousands(123456789.567, { digit: 5 }); // "123,456,789.56700"
  * ```
  */
-export function priceToThousands(num: number, decimals: number = 2): string {
-  const fixed = decimals >= 0 ? num.toFixed(decimals) : num.toString();
+export function priceToThousands(amount: number, options?: AmountOpt): string {
+  const { digit = 0, round = false } = options || {};
+  
+  let value = amount;
+  
+  // 如果需要四舍五入
+  if (round && digit > 0) {
+    const multiplier = Math.pow(10, digit);
+    value = Math.round(amount * multiplier) / multiplier;
+  }
+  
+  // 格式化小数位
+  const fixed = digit >= 0 ? value.toFixed(digit) : value.toString();
   const parts = fixed.split('.');
+  
+  // 添加千分位逗号
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  
   return parts.join('.');
 }
 
 /**
  * 金额转大写汉字（支持小数位）
  * 
- * @param num - 金额数值
- * @returns 大写汉字字符串
+ * @param val - 金额
+ * @param format - 整（如果是整数金额最后面会默认加个"整"，不想要的话给空字符串 ""）
+ * @returns 返回大写汉字字符串
  * 
  * @example
  * ```typescript
- * priceUppercase(123.45); // "壹佰贰拾叁元肆角伍分"
- * priceUppercase(1000); // "壹仟元整"
- * priceUppercase(0.5); // "伍角"
+ * priceUppercase(1234567); // "壹佰贰拾叁万肆仟伍佰陆拾柒元整"
+ * priceUppercase(1234567.123); // "壹佰贰拾叁万肆仟伍佰陆拾柒元壹角贰分叁毫"
+ * priceUppercase(1234567, ''); // "壹佰贰拾叁万肆仟伍佰陆拾柒元"
  * ```
  */
-export function priceUppercase(num: number): string {
+export function priceUppercase(val: number, format: string = '整'): string {
+  const num = val;
   const upperCaseNums = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
   const units = ['', '拾', '佰', '仟'];
   const bigUnits = ['', '万', '亿'];
@@ -221,7 +282,10 @@ export function priceUppercase(num: number): string {
   if (integerStr) {
     result += integerStr + '元';
     if (!decimalStr) {
-      result += '整';
+      // 根据 format 参数决定是否添加"整"
+      if (format) {
+        result += format;
+      }
     } else {
       result += decimalStr;
     }

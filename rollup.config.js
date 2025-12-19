@@ -21,6 +21,6 @@ export default {
       declarationDir: './dist'
     })
   ],
-  external: []
+  external: ['vue', 'fs', 'path']
 };
 

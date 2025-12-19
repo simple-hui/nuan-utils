@@ -2,7 +2,7 @@
  * 文件下载相关工具函数
  */
 
-import { dataURLtoBlob } from './image';
+import { dataURLtoBlob } from './base64Conver';
 
 /**
  * 下载在线图片
